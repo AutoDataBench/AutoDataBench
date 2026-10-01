@@ -2,6 +2,7 @@
 
 from inspect_ai import Task
 from inspect_ai.dataset import Sample
+from inspect_ai.util import SandboxEnvironmentSpec
 
 from bench_core.task_def import TaskDefinition
 
@@ -10,7 +11,11 @@ from .scorer import test_scorer
 from .solver import initialize_runtime, submit_best_on_exit
 
 
-def task_from_definition(definition: TaskDefinition) -> Task:
+def task_from_definition(
+    definition: TaskDefinition,
+    *,
+    sandbox: str | None = None,
+) -> Task:
     backends = definition.backend_factory(
         data=definition.data,
         model=definition.model,
@@ -23,8 +28,12 @@ def task_from_definition(definition: TaskDefinition) -> Task:
         training=backends["training"],
         validator=definition.validator,
         instructions=instructions,
+        use_python=sandbox is not None,
     )
     limits = definition.agent_limits
+    task_options = {}
+    if sandbox is not None:
+        task_options["sandbox"] = SandboxEnvironmentSpec(sandbox)
     return Task(
         dataset=[
             Sample(
@@ -44,5 +53,5 @@ def task_from_definition(definition: TaskDefinition) -> Task:
         message_limit=limits.get("message_limit"),
         token_limit=limits.get("token_limit"),
         time_limit=limits.get("time_limit"),
+        **task_options,
     )
-

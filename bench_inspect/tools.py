@@ -18,14 +18,22 @@ def _json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False)
 
 
-def make_train_and_eval(backend: TrainEvalBackend, validator: FormatValidator):
+def make_train_and_eval(
+    backend: TrainEvalBackend,
+    validator: FormatValidator,
+    model_backend: ModelBackend | None = None,
+):
     @tool(name="train_and_eval")
     def factory():
         async def execute(dataset_path: str, n_seeds: int = 1) -> str:
             """Train on a candidate dataset and return validation results."""
             try:
                 result = await operations.train_and_eval(
-                    backend, validator, dataset_path, n_seeds
+                    backend,
+                    validator,
+                    dataset_path,
+                    n_seeds,
+                    model_backend,
                 )
                 return _json(result)
             except operations.QuotaExceededError as error:
@@ -144,4 +152,3 @@ def make_submit_final(backend: DataBackend):
         return execute
 
     return factory
-

@@ -1,0 +1,51 @@
+"""Dense retrieval data-curation benchmark."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import yaml
+
+from bench_core.quota import QuotaConfig
+from bench_core.task_def import TaskDefinition
+
+from .backends import build_backends
+from .validator import RetrievalValidator
+
+TASK_DIR = Path(__file__).parent
+
+
+def load_task(
+    *,
+    data_root: str | None = None,
+) -> TaskDefinition:
+    config = yaml.safe_load((TASK_DIR / "config.yaml").read_text())
+    data = dict(config["data"])
+    if data_root is not None:
+        data["pool_path"] = str(Path(data_root) / "train.jsonl")
+
+    prompts = {
+        name: (TASK_DIR / filename).read_text()
+        for name, filename in {
+            "background": "background.md",
+            "task": "task_prompt.md",
+            "format": "format_spec.md",
+        }.items()
+    }
+    prompts["task"] = prompts["task"].replace("{POOL_PATH}", data["pool_path"])
+    return TaskDefinition(
+        task_id=config["task_id"],
+        version=str(config["version"]),
+        description=config["description"],
+        quota=QuotaConfig.from_dict(config["quota"]),
+        prompts=prompts,
+        validator=RetrievalValidator(),
+        backend_factory=build_backends,
+        data=data,
+        model=config["model"],
+        training=config["training"],
+        agent_limits=config.get("agent_limits", {}),
+    )
+
+
+__all__ = ["load_task"]

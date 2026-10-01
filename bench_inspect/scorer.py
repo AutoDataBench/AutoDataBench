@@ -29,4 +29,3 @@ def test_scorer(backend: ScorerBackend) -> Scorer:
         )
 
     return score
-

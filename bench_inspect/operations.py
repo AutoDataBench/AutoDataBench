@@ -34,6 +34,7 @@ async def train_and_eval(
     validator: FormatValidator,
     dataset_path: str,
     n_seeds: int = 1,
+    model_backend: ModelBackend | None = None,
 ) -> dict[str, Any]:
     _check("eval_calls", "train_samples")
     validation = validator.validate(dataset_path)
@@ -44,6 +45,8 @@ async def train_and_eval(
     _debit("eval_calls", n_seeds)
     _debit("train_samples", n_samples)
     try:
+        if model_backend is not None:
+            await model_backend.release()
         result = await backend.train_and_eval(dataset_path, n_seeds=n_seeds)
     except Exception:
         quota = current().quota
@@ -98,7 +101,10 @@ async def data_read(
     return result
 
 
-async def submit(backend: DataBackend, dataset_path: str) -> dict[str, Any]:
+async def submit(
+    backend: DataBackend,
+    dataset_path: str,
+) -> dict[str, Any]:
     state = current()
     if state.submitted_path == dataset_path:
         return {"accepted": True, "path": dataset_path, "already_submitted": True}

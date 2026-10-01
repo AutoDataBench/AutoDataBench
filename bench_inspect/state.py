@@ -33,4 +33,3 @@ def current() -> RuntimeState:
     if state is None:
         raise RuntimeError("runtime state is not initialized")
     return state
-

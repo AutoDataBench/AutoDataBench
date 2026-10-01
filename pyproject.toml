@@ -8,13 +8,20 @@ version = "0.1.0"
 description = "A benchmark for agents that improve training data under resource budgets."
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["inspect-ai==0.3.232"]
+dependencies = ["inspect-ai==0.3.232", "pyyaml>=6,<7"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+retrieval = [
+    "mteb==2.15.4",
+    "numpy==2.4.6",
+    "sentence-transformers==5.6.0",
+    "torch==2.6.0",
+    "transformers==5.12.1",
+]
 
 [tool.setuptools.packages.find]
-include = ["bench_core*", "bench_inspect*"]
+include = ["bench_core*", "bench_inspect*", "bench_tasks*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

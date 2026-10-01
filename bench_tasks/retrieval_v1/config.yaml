@@ -1,0 +1,45 @@
+task_id: retrieval_v1
+version: 0.1.0
+description: Curate training examples for a dense retrieval model.
+
+quota:
+  train_samples:
+    limit: 6000000
+    terminal: true
+  eval_calls:
+    limit: 20
+  small_model_tokens:
+    limit: 2500000000
+  read_samples:
+    limit: 5000
+
+agent_limits:
+  message_limit: 300
+  token_limit: 10000000
+  time_limit: 86400
+
+data:
+  pool_path: data/retrieval_v1/train.jsonl
+
+model:
+  mode: http
+  generation_model: Qwen/Qwen3-4B-Instruct-2507
+  generation_url: http://localhost:8000/v1
+  embedding_model: Qwen/Qwen3-Embedding-0.6B
+  embedding_url: http://localhost:8001/v1
+
+training:
+  mode: real
+  base_model: nreimers/MiniLM-L6-H384-uncased
+  epochs: 1
+  batch_size: 128
+  learning_rate: 0.00005
+  warmup_ratio: 0.1
+  max_length: 512
+  minimize: false
+  benchmarks:
+    - ArguAna
+    - FEVERHardNegatives
+    - FiQA2018
+    - HotpotQAHardNegatives
+    - SCIDOCS

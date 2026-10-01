@@ -48,3 +48,14 @@ pytest
 Datasets, model weights, checkpoints, and experiment logs are not stored in
 this repository. Download instructions and Hugging Face references will be
 added with each benchmark task.
+
+## Retrieval benchmark
+
+The first included task is retrieval_v1. Its configuration and data setup are
+in bench_tasks/retrieval_v1. Install its training stack with:
+
+    python -m pip install -e '.[retrieval]'
+
+Run it with:
+
+    inspect eval benchmark_task.py@retrieval_v1 --model <provider/model>
