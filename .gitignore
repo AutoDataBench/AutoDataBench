@@ -1,0 +1,37 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime output
+logs/
+artifacts/
+eval_results/
+checkpoints/
+
+# Models and datasets are published separately.
+models/
+model/
+data/
+datasets/
+*.jsonl
+*.parquet
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.zip
+*.npy
+
+# Editor and OS files
+.DS_Store
+.idea/
+.vscode/
+
