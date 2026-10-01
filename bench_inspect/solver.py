@@ -18,13 +18,13 @@ def initialize_runtime(
     config: QuotaConfig,
     *,
     minimize: bool = False,
-    pool_path: str | None = None,
+    data_paths: list[str] | None = None,
     prompts: dict[str, str] | None = None,
 ) -> Solver:
     async def solve(state, generate):
         workspace = Path(tempfile.mkdtemp(prefix="autodatabench-"))
-        if pool_path is not None:
-            shutil.copyfile(pool_path, workspace / Path(pool_path).name)
+        for source in data_paths or []:
+            shutil.copyfile(source, workspace / Path(source).name)
         prompt_files = {
             "background": "background.md",
             "format": "format_spec.md",

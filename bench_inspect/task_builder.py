@@ -45,7 +45,11 @@ def task_from_definition(
             initialize_runtime(
                 definition.quota,
                 minimize=bool(definition.training.get("minimize", False)),
-                pool_path=definition.data.get("pool_path"),
+                data_paths=[
+                    path
+                    for name, path in definition.data.items()
+                    if name in {"pool_path", "sources_path"}
+                ],
                 prompts=definition.prompts,
             ),
             agent,

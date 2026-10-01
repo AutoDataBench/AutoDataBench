@@ -65,3 +65,12 @@ in bench_tasks/retrieval_v1. Install its training stack with:
 Run it with:
 
     inspect eval benchmark_task.py@retrieval_v1 --model <provider/model>
+
+## Knowledge-injection benchmark
+
+`knowledge_injection_v1` constructs offline OPSD data for Talkie-13B and
+scores post-1930 knowledge together with pre-1930 retention. Install its
+training stack and run it with:
+
+    python -m pip install -e '.[knowledge-injection]'
+    inspect eval benchmark_task.py@knowledge_injection_v1 --model <provider/model>

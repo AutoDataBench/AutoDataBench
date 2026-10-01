@@ -1,0 +1,45 @@
+task_id: knowledge_injection_v1
+version: 0.1.0
+description: Build OPSD data that teaches post-1930 knowledge while retaining earlier knowledge.
+
+quota:
+  train_samples:
+    limit: 100000
+    terminal: true
+  eval_calls:
+    limit: 20
+  small_model_tokens:
+    limit: 2000000000
+  read_samples:
+    limit: 10000
+
+agent_limits:
+  message_limit: 300
+  token_limit: 10000000
+  time_limit: 86400
+
+data:
+  pool_path: data/knowledge_injection_v1/context_pool.jsonl
+  sources_path: data/knowledge_injection_v1/sources.jsonl
+
+model:
+  mode: http
+  generation_model: Qwen/Qwen3-4B-Instruct-2507
+  generation_url: http://localhost:8000/v1
+  embedding_model: Qwen/Qwen3-Embedding-0.6B
+  embedding_url: http://localhost:8001/v1
+
+training:
+  mode: real
+  base_model: models/talkie-1930-13b-it-vllm
+  num_gpus: 1
+  divergence: forward_kl
+  epochs: 1
+  learning_rate: 0.0002
+  effective_batch_size: 8
+  max_sequence_tokens: 2048
+  max_answer_tokens: 128
+  lora_rank: 16
+  lora_alpha: 32
+  lora_dropout: 0.0
+  minimize: false

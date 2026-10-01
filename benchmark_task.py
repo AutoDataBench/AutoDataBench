@@ -4,8 +4,14 @@ from inspect_ai import task
 
 from bench_inspect import task_from_definition
 from bench_tasks.retrieval_v1 import load_task
+from bench_tasks.knowledge_injection_v1 import load_task as load_knowledge_injection
 
 
 @task
 def retrieval_v1():
     return task_from_definition(load_task(), sandbox="local")
+
+
+@task
+def knowledge_injection_v1():
+    return task_from_definition(load_knowledge_injection(), sandbox="local")
