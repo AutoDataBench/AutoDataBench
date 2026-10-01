@@ -5,10 +5,15 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "autodatabench"
 version = "0.1.0"
-description = "A benchmark for agents that improve training data under resource budgets."
+description = "A data-centric testbed for evaluating agents that improve training data."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["httpx>=0.27,<1", "inspect-ai==0.3.232", "pyyaml>=6,<7"]
+
+[project.urls]
+Paper = "https://arxiv.org/abs/2609.40097"
+Repository = "https://github.com/AutoDataBench/AutoDataBench"
+"Data and models" = "https://huggingface.co/AutoDataBench"
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]

@@ -1,101 +1,113 @@
 # AutoDataBench
 
-AutoDataBench evaluates agents that improve training datasets under explicit
-resource budgets. An agent can inspect a data pool, create a candidate dataset,
-train and validate a model, and submit its best dataset for held-out scoring.
+[![arXiv](https://img.shields.io/badge/arXiv-2609.40097-b31b1b.svg)](https://arxiv.org/abs/2609.40097)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97-Hugging_Face-FFD21E.svg)](https://huggingface.co/AutoDataBench)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 
-The repository currently contains the framework-independent contracts and the
-Inspect AI runtime adapter. Benchmark tasks will follow in later releases.
+AutoDataBench is a controlled testbed for evaluating **data intelligence**:
+an agent's ability to diagnose, organize, and construct training data. It holds
+models, training recipes, evaluation, and compute budgets fixed so that gains
+can be attributed to the agent's data interventions.
 
-## Design
+[[Paper](https://arxiv.org/abs/2609.40097)]
+[[Data and models](https://huggingface.co/AutoDataBench)]
 
-The framework has three layers:
+## Benchmarks
 
-1. `bench_core` defines tasks, resource budgets, backend interfaces, and
-   best-result tracking.
-2. A runtime adapter exposes those interfaces as tools to an agent and manages
-   an evaluation run.
-3. Each benchmark task supplies its configuration, data access, validation,
-   training, and held-out scoring implementations.
+| Task | Objective | Base model | Primary metric |
+| --- | --- | --- | --- |
+| Retrieval | Improve dense-retrieval training data | MiniLM | nDCG@10 |
+| Knowledge injection | Teach post-1930 facts while retaining prior knowledge | Talkie-13B | Macro normalized accuracy |
+| Function calling | Curate noisy tool-use training examples | Qwen2-1.5B-Instruct | Macro AST accuracy |
 
-The core package deliberately has no dependency on an agent framework or a
-machine-learning stack. `bench_inspect` is the small adapter that connects the
-core contracts to Inspect AI.
-
-## Runtime lifecycle
-
-For each sample, the adapter initializes quota and best-result state, runs the
-agent with eight benchmark tools, automatically submits the best validation
-result if needed, and scores the submitted dataset on the held-out split.
-
-Agent-written Python runs without network access in a private `/workspace`.
-The `bench_helpers` package lets a Python script call the same small-model,
-validation, and training backends as the direct tools. Each call is handled by
-the host and the script is replayed with the response cached; this preserves
-the quota and best-result state used by the original experiments.
-
-Each run is saved under `runs/<task>_<timestamp>_<id>/`. The artifacts include
-the submitted dataset, best validation dataset and checkpoint, task config,
-evaluation history, final scores, quota usage, agent messages, and a JSONL
-trajectory. Only the current best checkpoint is retained; superseded and
-non-improving checkpoints are removed. OOD evaluation should use
-`artifacts/best_checkpoint/` together with `artifacts/best_dataset.jsonl`.
-
-The paper's OOD evaluations can be run directly on a saved best checkpoint:
-
-    python -m bench_tasks.retrieval_v1.ood runs/<retrieval-run>/artifacts/best_checkpoint
-    python -m bench_tasks.function_call_v1.ood runs/<function-run>/artifacts/best_checkpoint
-
-The function-calling command expects the separately distributed BFCL guard at
-`data/function_call_v1/bfcl_guard.jsonl`. Knowledge injection already reports
-novel-knowledge and retention performance as part of its primary evaluation.
+Each task gives the agent a data pool and a fixed resource budget. The agent
+iteratively builds candidate datasets, trains and validates a model, and
+submits its best dataset for held-out evaluation.
 
 ## Installation
 
 AutoDataBench requires Python 3.10 or newer.
 
 ```bash
+git clone https://github.com/AutoDataBench/AutoDataBench.git
+cd AutoDataBench
 python -m pip install -e .
 ```
 
-For development:
+Install the dependencies for the task you want to run:
 
 ```bash
-python -m pip install -e '.[dev]'
-pytest
+python -m pip install -e '.[retrieval]'
+python -m pip install -e '.[knowledge-injection]'
+python -m pip install -e '.[function-call]'
 ```
+
+For development, install `.[dev]` and run `pytest`.
+
+## Running a benchmark
+
+AutoDataBench uses [Inspect AI](https://inspect.aisi.org.uk/) as its agent
+runtime. Run a task with any model supported by Inspect:
+
+```bash
+inspect eval benchmark_task.py@retrieval_v1 --model <provider/model>
+inspect eval benchmark_task.py@knowledge_injection_v1 --model <provider/model>
+inspect eval benchmark_task.py@function_call_v1 --model <provider/model>
+```
+
+The agent works in an isolated `/workspace` without network access. Its tools
+provide controlled access to data, small-model inference, validation, and
+training. This preserves the resource accounting used in the paper.
 
 ## Data and models
 
-Datasets, model weights, checkpoints, and experiment logs are not stored in
-this repository. Download instructions and Hugging Face references will be
-added with each benchmark task.
+Datasets and model weights are distributed through the
+[AutoDataBench organization on Hugging Face](https://huggingface.co/AutoDataBench),
+not this Git repository. Setup instructions and expected paths are documented
+for [retrieval](bench_tasks/retrieval_v1/DATA.md),
+[knowledge injection](bench_tasks/knowledge_injection_v1/DATA.md), and
+[function calling](bench_tasks/function_call_v1/DATA.md).
 
-## Retrieval benchmark
+## Outputs and OOD evaluation
 
-The first included task is retrieval_v1. Its configuration and data setup are
-in bench_tasks/retrieval_v1. Install its training stack with:
+Runs are saved under `runs/<task>_<timestamp>_<id>/`. Each run records the
+submitted and best validation datasets, the best checkpoint, task
+configuration, scores, quota usage, agent messages, and a JSONL trajectory.
+Only the current best checkpoint is retained.
 
-    python -m pip install -e '.[retrieval]'
+Run the paper's OOD evaluations on a saved checkpoint with:
 
-Run it with:
+```bash
+python -m bench_tasks.retrieval_v1.ood runs/<retrieval-run>/artifacts/best_checkpoint
+python -m bench_tasks.function_call_v1.ood runs/<function-run>/artifacts/best_checkpoint
+```
 
-    inspect eval benchmark_task.py@retrieval_v1 --model <provider/model>
+Function-calling OOD evaluation expects the separately distributed BFCL guard
+at `data/function_call_v1/bfcl_guard.jsonl`. Knowledge injection reports novel
+knowledge and retention performance in its primary evaluation.
 
-## Knowledge-injection benchmark
+## Repository structure
 
-`knowledge_injection_v1` constructs offline OPSD data for Talkie-13B and
-scores post-1930 knowledge together with pre-1930 retention. Install its
-training stack and run it with:
+```text
+bench_core/       Framework-independent task and budget contracts
+bench_inspect/    Inspect AI runtime adapter and agent tools
+bench_helpers/    Helpers available to agent-written Python programs
+bench_tasks/      Task configurations, backends, prompts, and evaluators
+benchmark_task.py Inspect task entry points
+```
 
-    python -m pip install -e '.[knowledge-injection]'
-    inspect eval benchmark_task.py@knowledge_injection_v1 --model <provider/model>
+## Citation
 
-## Function-calling benchmark
+If you use AutoDataBench, please cite:
 
-`function_call_v1` curates noisy single-turn function-calling examples, trains
-Qwen2-1.5B-Instruct with a fixed LoRA recipe, and measures held-out macro AST
-accuracy. Install and run it with:
-
-    python -m pip install -e '.[function-call]'
-    inspect eval benchmark_task.py@function_call_v1 --model <provider/model>
+```bibtex
+@misc{yuan2026autodatabench,
+  title         = {AutoDataBench: A Data-centric Testbed for Accelerating Auto Research},
+  author        = {Ruifeng Yuan and Yizhi Li and Yaxin Du and Fengyu Cai and Yiqi Liu and Hou Pong Chan and Chenghua Lin and Yun Chen and Jian Yang and Bryan Dai and Pinyan Lu and Chenghao Xiao},
+  year          = {2026},
+  eprint        = {2609.40097},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
+  url           = {https://arxiv.org/abs/2609.40097}
+}
+```

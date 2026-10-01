@@ -1,0 +1,63 @@
+cff-version: 1.2.0
+message: "If you use AutoDataBench, please cite our paper."
+title: "AutoDataBench"
+type: software
+version: 0.1.0
+date-released: 2026-09-30
+repository-code: "https://github.com/AutoDataBench/AutoDataBench"
+url: "https://arxiv.org/abs/2609.40097"
+authors:
+  - given-names: Ruifeng
+    family-names: Yuan
+  - given-names: Yizhi
+    family-names: Li
+  - given-names: Yaxin
+    family-names: Du
+  - given-names: Fengyu
+    family-names: Cai
+  - given-names: Yiqi
+    family-names: Liu
+  - given-names: Hou Pong
+    family-names: Chan
+  - given-names: Chenghua
+    family-names: Lin
+  - given-names: Yun
+    family-names: Chen
+  - given-names: Jian
+    family-names: Yang
+  - given-names: Bryan
+    family-names: Dai
+  - given-names: Pinyan
+    family-names: Lu
+  - given-names: Chenghao
+    family-names: Xiao
+preferred-citation:
+  type: article
+  title: "AutoDataBench: A Data-centric Testbed for Accelerating Auto Research"
+  year: 2026
+  url: "https://arxiv.org/abs/2609.40097"
+  authors:
+    - given-names: Ruifeng
+      family-names: Yuan
+    - given-names: Yizhi
+      family-names: Li
+    - given-names: Yaxin
+      family-names: Du
+    - given-names: Fengyu
+      family-names: Cai
+    - given-names: Yiqi
+      family-names: Liu
+    - given-names: Hou Pong
+      family-names: Chan
+    - given-names: Chenghua
+      family-names: Lin
+    - given-names: Yun
+      family-names: Chen
+    - given-names: Jian
+      family-names: Yang
+    - given-names: Bryan
+      family-names: Dai
+    - given-names: Pinyan
+      family-names: Lu
+    - given-names: Chenghao
+      family-names: Xiao
