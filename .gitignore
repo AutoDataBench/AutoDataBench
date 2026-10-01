@@ -15,6 +15,7 @@ logs/
 artifacts/
 eval_results/
 checkpoints/
+runs/
 
 # Models and datasets are published separately.
 models/
@@ -34,4 +35,3 @@ datasets/
 .DS_Store
 .idea/
 .vscode/
-

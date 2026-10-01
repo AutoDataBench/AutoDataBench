@@ -7,6 +7,8 @@ from bench_tasks.function_call_v1 import load_task
 from bench_tasks.function_call_v1.backends import FunctionCallDataBackend
 from bench_tasks.function_call_v1.validator import FunctionCallValidator
 from bench_tasks.function_call_v1.scripts.eval import case_match, parse_output
+from bench_tasks.function_call_v1.ood import LIVE, NONLIVE, _macro
+from bench_tasks.retrieval_v1.ood import OOD_BENCHMARKS
 
 
 def _write_jsonl(path: Path, rows: list[dict]) -> None:
@@ -72,3 +74,16 @@ def test_ast_matching_accepts_parallel_call_permutations() -> None:
         '{"name":"weather","arguments":{"city":"Paris"}}]'
     )
     assert case_match(predicted, gold, "parallel") is True
+
+
+def test_paper_ood_protocols_are_fixed() -> None:
+    assert OOD_BENCHMARKS == [
+        "ClimateFEVERHardNegatives",
+        "CQADupstackGamingRetrieval",
+        "CQADupstackUnixRetrieval",
+        "Touche2020Retrieval.v3",
+        "TRECCOVID",
+    ]
+    scores = {name: 0.5 for name in NONLIVE + LIVE}
+    assert _macro(scores, NONLIVE) == 0.5
+    assert _macro(scores, LIVE) == 0.5

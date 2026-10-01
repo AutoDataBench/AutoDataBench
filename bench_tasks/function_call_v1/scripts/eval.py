@@ -176,7 +176,7 @@ def eval_worker(gpu_id, samples, model_dir, base_model, batch_size, max_new_toke
     result_queue.put((gpu_id, results))
 
 # ── 可复用流程（main 与 run_bfcl_eval.py 共用）──
-def ensure_merged(adapter, base_model):
+def ensure_merged(adapter, base_model, merged_dir=None):
     """adapter 目录 → merged 完整模型目录（有缓存）。'NONE' → base 模型 zero-shot。
     若传入的已是完整模型目录（有 config.json、无 adapter_config.json），原样返回。"""
     if adapter == "NONE":
@@ -184,7 +184,7 @@ def ensure_merged(adapter, base_model):
     adapter = Path(adapter)
     if (adapter / "config.json").exists() and not (adapter / "adapter_config.json").exists():
         return str(adapter)
-    merged_dir = str(adapter.parent / "merged")
+    merged_dir = str(merged_dir or adapter.parent / "merged")
     if not os.path.exists(merged_dir):
         print("Merging adapter...")
         tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)

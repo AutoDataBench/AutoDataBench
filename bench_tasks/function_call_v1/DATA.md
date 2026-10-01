@@ -5,6 +5,7 @@ Place separately distributed files at:
 ```text
 data/function_call_v1/pool_agent.jsonl
 data/function_call_v1/test.jsonl
+data/function_call_v1/bfcl_guard.jsonl
 models/Qwen2-1.5B-Instruct/
 ```
 

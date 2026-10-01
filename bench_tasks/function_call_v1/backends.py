@@ -163,7 +163,7 @@ def _run_pipeline(dataset_path: str, config: dict, checkpoint_dir: str | None):
         )
         scores = json.loads((output_path / "test_scores.json").read_text())
         if checkpoint_dir:
-            destination = Path(checkpoint_dir) / "adapter"
+            destination = Path(checkpoint_dir)
             shutil.copytree(output_path / "adapter", destination, dirs_exist_ok=True)
             scores["checkpoint_path"] = str(destination)
         return scores

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from bench_core.quota import QuotaConfig
@@ -6,6 +8,7 @@ from bench_inspect import task_from_definition
 from bench_inspect.operations import auto_submit, data_read, train_and_eval
 from bench_inspect.state import current, initialize
 from bench_core.sandbox import lock_paths_from_agent
+from bench_core.artifacts import RunArtifacts
 
 
 class Validator:
@@ -34,6 +37,13 @@ class Training:
             "dataset_hash": "hash",
             "n_samples_trained": 4,
         }
+
+
+class CheckpointTraining(Training):
+    async def train_and_eval(self, dataset_path, n_seeds=1, checkpoint_dir=None):
+        assert checkpoint_dir is not None
+        Path(checkpoint_dir, "model.bin").write_bytes(b"checkpoint")
+        return await super().train_and_eval(dataset_path, n_seeds, checkpoint_dir)
 
 
 class Model:
@@ -108,3 +118,28 @@ def test_private_paths_are_hidden_from_sandbox_uid(tmp_path) -> None:
     lock_paths_from_agent([str(private)])
     assert private.stat().st_mode & 0o007 == 0
     assert private.stat().st_mode & 0o600 == 0o600
+
+
+@pytest.mark.anyio
+async def test_train_eval_promotes_checkpoint_and_dataset(tmp_path) -> None:
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    candidate = workspace / "candidate.jsonl"
+    candidate.write_text("{}\n" * 4)
+    artifacts = RunArtifacts.create("stub", tmp_path / "runs")
+    initialize(
+        QuotaConfig.from_dict(
+            {"eval_calls": {"limit": 2}, "train_samples": {"limit": 10}}
+        ),
+        workspace=workspace,
+        artifacts=artifacts,
+    )
+
+    result = await train_and_eval(
+        CheckpointTraining(), Validator(), str(candidate), 1, Model()
+    )
+
+    assert result["best_updated"] is True
+    assert result["checkpoint_path"] == str(artifacts.artifacts_dir / "best_checkpoint")
+    assert (artifacts.artifacts_dir / "best_checkpoint" / "model.bin").is_file()
+    assert (artifacts.artifacts_dir / "best_dataset.jsonl").read_text() == candidate.read_text()

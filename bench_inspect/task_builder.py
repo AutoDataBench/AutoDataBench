@@ -15,6 +15,7 @@ def task_from_definition(
     definition: TaskDefinition,
     *,
     sandbox: str | None = None,
+    output_root: str = "runs",
 ) -> Task:
     backends = definition.backend_factory(
         data=definition.data,
@@ -52,6 +53,25 @@ def task_from_definition(
                 ],
                 prompts=definition.prompts,
                 private_paths=definition.private_paths,
+                task_id=definition.task_id,
+                output_root=output_root,
+                task_config={
+                    "task_id": definition.task_id,
+                    "version": definition.version,
+                    "description": definition.description,
+                    "quota": {
+                        name: {
+                            "limit": axis.limit,
+                            "terminal": axis.terminal,
+                            "description": axis.description,
+                        }
+                        for name, axis in definition.quota.axes.items()
+                    },
+                    "data": definition.data,
+                    "model": definition.model,
+                    "training": definition.training,
+                    "agent_limits": definition.agent_limits,
+                },
             ),
             agent,
             submit_best_on_exit(backends["data"]),

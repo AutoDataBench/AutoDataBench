@@ -45,27 +45,50 @@ async def train_and_eval(
     n_samples = await backend.count_samples(dataset_path)
     _debit("eval_calls", n_seeds)
     _debit("train_samples", n_samples)
+    artifacts = current().artifacts
+    eval_sequence = None
+    checkpoint = None
+    if artifacts is not None:
+        eval_sequence, _, checkpoint = artifacts.start_eval(dataset_path)
     try:
         if model_backend is not None:
             await model_backend.release()
-        result = await backend.train_and_eval(dataset_path, n_seeds=n_seeds)
-    except Exception:
+        result = await backend.train_and_eval(
+            dataset_path,
+            n_seeds=n_seeds,
+            checkpoint_dir=str(checkpoint) if checkpoint is not None else None,
+        )
+        scores = result.get("val_scores", [])
+        if not scores:
+            raise ValueError("training backend returned no validation scores")
+    except Exception as error:
         quota = current().quota
         if quota.has_axis("eval_calls"):
             quota.refund("eval_calls", n_seeds)
         if quota.has_axis("train_samples"):
             quota.refund("train_samples", n_samples)
+        if artifacts is not None and checkpoint is not None and eval_sequence is not None:
+            artifacts.fail_eval(eval_sequence, checkpoint, error)
         raise
 
-    scores = result.get("val_scores", [])
-    if not scores:
-        raise ValueError("training backend returned no validation scores")
     score = sum(scores) / len(scores)
     improved = current().best.consider(
         dataset_path=dataset_path,
         score=score,
         dataset_hash=result["dataset_hash"],
     )
+    if artifacts is not None and checkpoint is not None and eval_sequence is not None:
+        saved_checkpoint = artifacts.finish_eval(
+            sequence=eval_sequence,
+            dataset_path=dataset_path,
+            dataset_hash=result["dataset_hash"],
+            checkpoint=checkpoint,
+            result=result,
+            mean_score=score,
+            best_updated=improved,
+            quota=current().quota.snapshot(),
+        )
+        result["checkpoint_path"] = saved_checkpoint or ""
     return {**result, "mean_score": score, "best_updated": improved}
 
 

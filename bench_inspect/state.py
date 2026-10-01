@@ -8,6 +8,7 @@ from pathlib import Path
 
 from bench_core.quota import QuotaConfig, QuotaState
 from bench_core.snapshot import BestSoFarSnapshot
+from bench_core.artifacts import RunArtifacts
 
 
 @dataclass
@@ -16,6 +17,7 @@ class RuntimeState:
     best: BestSoFarSnapshot
     submitted_path: str | None = None
     workspace: Path | None = None
+    artifacts: RunArtifacts | None = None
 
 
 _state: ContextVar[RuntimeState | None] = ContextVar("autodatabench_state", default=None)
@@ -26,11 +28,13 @@ def initialize(
     *,
     minimize: bool = False,
     workspace: Path | None = None,
+    artifacts: RunArtifacts | None = None,
 ) -> RuntimeState:
     state = RuntimeState(
         quota=QuotaState(config),
         best=BestSoFarSnapshot(minimize=minimize),
         workspace=workspace,
+        artifacts=artifacts,
     )
     _state.set(state)
     return state

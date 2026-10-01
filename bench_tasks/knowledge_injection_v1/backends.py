@@ -145,8 +145,8 @@ def _run_pipeline(dataset_path: str, config: dict, checkpoint_dir: str | None):
             source = Path(output) / "training" / "final_adapter"
             if source.is_dir():
                 import shutil
-                shutil.copytree(source, Path(checkpoint_dir) / "final_adapter", dirs_exist_ok=True)
-                result["checkpoint_path"] = str(Path(checkpoint_dir) / "final_adapter")
+                shutil.copytree(source, Path(checkpoint_dir), dirs_exist_ok=True)
+                result["checkpoint_path"] = str(Path(checkpoint_dir))
         return result
 
 

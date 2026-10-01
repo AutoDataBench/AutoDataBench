@@ -34,6 +34,22 @@ validation, and training backends as the direct tools. Each call is handled by
 the host and the script is replayed with the response cached; this preserves
 the quota and best-result state used by the original experiments.
 
+Each run is saved under `runs/<task>_<timestamp>_<id>/`. The artifacts include
+the submitted dataset, best validation dataset and checkpoint, task config,
+evaluation history, final scores, quota usage, agent messages, and a JSONL
+trajectory. Only the current best checkpoint is retained; superseded and
+non-improving checkpoints are removed. OOD evaluation should use
+`artifacts/best_checkpoint/` together with `artifacts/best_dataset.jsonl`.
+
+The paper's OOD evaluations can be run directly on a saved best checkpoint:
+
+    python -m bench_tasks.retrieval_v1.ood runs/<retrieval-run>/artifacts/best_checkpoint
+    python -m bench_tasks.function_call_v1.ood runs/<function-run>/artifacts/best_checkpoint
+
+The function-calling command expects the separately distributed BFCL guard at
+`data/function_call_v1/bfcl_guard.jsonl`. Knowledge injection already reports
+novel-knowledge and retention performance as part of its primary evaluation.
+
 ## Installation
 
 AutoDataBench requires Python 3.10 or newer.
