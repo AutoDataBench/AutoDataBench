@@ -21,7 +21,7 @@ retrieval = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["bench_core*", "bench_inspect*", "bench_tasks*"]
+include = ["bench_core*", "bench_helpers*", "bench_inspect*", "bench_tasks*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

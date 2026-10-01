@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from inspect_ai.agent import as_solver, deepagent
-from inspect_ai.tool import memory, python
+from inspect_ai.tool import memory
 
 from bench_core.backends import DataBackend, ModelBackend, TrainEvalBackend
 from bench_core.task_def import FormatValidator
@@ -18,6 +18,8 @@ from .tools import (
     make_train_and_eval,
     make_validate_format,
 )
+from .bridge import BridgeHandler
+from .python_tool import make_python_tool
 
 PROMPTS_DIR = Path(__file__).parent / "prompts"
 
@@ -54,7 +56,7 @@ def build_agent(
         memory(),
     ]
     if use_python:
-        tools.append(python())
+        tools.append(make_python_tool(BridgeHandler(model, training, validator))())
     return as_solver(
         deepagent(
             tools=tools,

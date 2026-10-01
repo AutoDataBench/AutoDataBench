@@ -7,7 +7,7 @@ from typing import Any
 from bench_core.backends import DataBackend, ModelBackend, TrainEvalBackend
 from bench_core.task_def import FormatValidator
 
-from .state import current
+from .state import current, resolve_workspace_path
 
 
 class QuotaExceededError(RuntimeError):
@@ -36,6 +36,7 @@ async def train_and_eval(
     n_seeds: int = 1,
     model_backend: ModelBackend | None = None,
 ) -> dict[str, Any]:
+    dataset_path = resolve_workspace_path(dataset_path)
     _check("eval_calls", "train_samples")
     validation = validator.validate(dataset_path)
     if not validation.get("valid", False):
@@ -95,6 +96,7 @@ async def data_read(
     *,
     max_rows: int = 500,
 ) -> dict[str, Any]:
+    dataset_path = resolve_workspace_path(dataset_path)
     _check("read_samples")
     result = await backend.read(dataset_path, where, min(n, max_rows))
     _debit("read_samples", result["n_returned"])
@@ -105,6 +107,7 @@ async def submit(
     backend: DataBackend,
     dataset_path: str,
 ) -> dict[str, Any]:
+    dataset_path = resolve_workspace_path(dataset_path)
     state = current()
     if state.submitted_path == dataset_path:
         return {"accepted": True, "path": dataset_path, "already_submitted": True}

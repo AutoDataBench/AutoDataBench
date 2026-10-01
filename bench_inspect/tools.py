@@ -11,7 +11,7 @@ from bench_core.backends import DataBackend, ModelBackend, TrainEvalBackend
 from bench_core.task_def import FormatValidator
 
 from . import operations
-from .state import current
+from .state import current, resolve_workspace_path
 
 
 def _json(value: Any) -> str:
@@ -102,7 +102,7 @@ def make_data_stats(backend: DataBackend):
     def factory():
         async def execute(dataset_path: str, axes: list[str]) -> str:
             """Return aggregate statistics for a dataset."""
-            return _json(await backend.stats(dataset_path, axes))
+            return _json(await backend.stats(resolve_workspace_path(dataset_path), axes))
 
         return execute
 
@@ -135,7 +135,7 @@ def make_validate_format(validator: FormatValidator):
     def factory():
         async def execute(dataset_path: str) -> str:
             """Validate a candidate dataset without consuming quota."""
-            return _json(validator.validate(dataset_path))
+            return _json(validator.validate(resolve_workspace_path(dataset_path)))
 
         return execute
 

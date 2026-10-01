@@ -28,6 +28,12 @@ For each sample, the adapter initializes quota and best-result state, runs the
 agent with eight benchmark tools, automatically submits the best validation
 result if needed, and scores the submitted dataset on the held-out split.
 
+Agent-written Python runs without network access in a private `/workspace`.
+The `bench_helpers` package lets a Python script call the same small-model,
+validation, and training backends as the direct tools. Each call is handled by
+the host and the script is replayed with the response cached; this preserves
+the quota and best-result state used by the original experiments.
+
 ## Installation
 
 AutoDataBench requires Python 3.10 or newer.

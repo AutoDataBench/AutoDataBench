@@ -45,6 +45,8 @@ def task_from_definition(
             initialize_runtime(
                 definition.quota,
                 minimize=bool(definition.training.get("minimize", False)),
+                pool_path=definition.data.get("pool_path"),
+                prompts=definition.prompts,
             ),
             agent,
             submit_best_on_exit(backends["data"]),
