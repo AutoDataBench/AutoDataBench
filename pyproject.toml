@@ -28,6 +28,14 @@ knowledge-injection = [
     "transformers==4.51.3",
     "vllm==0.9.2",
 ]
+function-call = [
+    "accelerate==1.14.0",
+    "datasets==5.0.1",
+    "peft==0.20.0",
+    "scipy==1.15.3",
+    "torch==2.7.0",
+    "transformers==4.51.3",
+]
 
 [tool.setuptools.packages.find]
 include = ["bench_core*", "bench_helpers*", "bench_inspect*", "bench_tasks*"]

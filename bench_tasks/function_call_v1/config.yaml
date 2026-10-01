@@ -1,0 +1,45 @@
+task_id: function_call_v1
+version: 0.1.0
+description: Curate noisy single-turn function-calling data for fixed LoRA training.
+
+quota:
+  train_samples:
+    limit: 160000
+    terminal: true
+  eval_calls:
+    limit: 20
+  small_model_tokens:
+    limit: 2000000000
+  read_samples:
+    limit: 10000
+
+agent_limits:
+  message_limit: 300
+  token_limit: 10000000
+  time_limit: 86400
+
+data:
+  pool_path: data/function_call_v1/pool_agent.jsonl
+  test_path: data/function_call_v1/test.jsonl
+
+model:
+  mode: http
+  generation_model: Qwen/Qwen3-4B-Instruct-2507
+  generation_url: http://localhost:8000/v1
+  embedding_model: Qwen/Qwen3-Embedding-0.6B
+  embedding_url: http://localhost:8001/v1
+
+training:
+  mode: real
+  base_model: models/Qwen2-1.5B-Instruct
+  train_cuda_visible_devices: "0"
+  epochs: 1
+  learning_rate: 0.00005
+  batch_size: 4
+  grad_accum: 2
+  lora_rank: 32
+  lora_alpha: 64
+  max_seq_len: 2048
+  no_grad_ckpt: true
+  train_seed: 42
+  minimize: false

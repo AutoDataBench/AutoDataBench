@@ -74,3 +74,12 @@ training stack and run it with:
 
     python -m pip install -e '.[knowledge-injection]'
     inspect eval benchmark_task.py@knowledge_injection_v1 --model <provider/model>
+
+## Function-calling benchmark
+
+`function_call_v1` curates noisy single-turn function-calling examples, trains
+Qwen2-1.5B-Instruct with a fixed LoRA recipe, and measures held-out macro AST
+accuracy. Install and run it with:
+
+    python -m pip install -e '.[function-call]'
+    inspect eval benchmark_task.py@function_call_v1 --model <provider/model>

@@ -51,6 +51,7 @@ def task_from_definition(
                     if name in {"pool_path", "sources_path"}
                 ],
                 prompts=definition.prompts,
+                private_paths=definition.private_paths,
             ),
             agent,
             submit_best_on_exit(backends["data"]),

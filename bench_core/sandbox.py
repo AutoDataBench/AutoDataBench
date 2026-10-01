@@ -63,3 +63,11 @@ def truncate_output(output: str, limit: int) -> str:
         + f"\n\n[OUTPUT TRUNCATED: {len(output)} characters; showing {limit}. "
         "Write large results to a file instead.]"
     )
+
+
+def lock_paths_from_agent(paths: list[str]) -> None:
+    """Remove access for the unprivileged Python UID while keeping owner access."""
+    for value in paths:
+        path = Path(value)
+        if path.exists():
+            path.chmod(path.stat().st_mode & ~0o007)

@@ -8,6 +8,7 @@ from inspect_ai.solver import Solver, solver
 
 from bench_core.backends import DataBackend
 from bench_core.quota import QuotaConfig
+from bench_core.sandbox import lock_paths_from_agent
 
 from .operations import auto_submit
 from .state import initialize
@@ -20,6 +21,7 @@ def initialize_runtime(
     minimize: bool = False,
     data_paths: list[str] | None = None,
     prompts: dict[str, str] | None = None,
+    private_paths: list[str] | None = None,
 ) -> Solver:
     async def solve(state, generate):
         workspace = Path(tempfile.mkdtemp(prefix="autodatabench-"))
@@ -32,6 +34,7 @@ def initialize_runtime(
         }
         for name, text in (prompts or {}).items():
             (workspace / prompt_files.get(name, f"{name}.md")).write_text(text)
+        lock_paths_from_agent(private_paths or [])
         initialize(config, minimize=minimize, workspace=workspace)
         return state
 

@@ -35,3 +35,4 @@ class TaskDefinition:
     model: dict[str, Any] = field(default_factory=dict)
     training: dict[str, Any] = field(default_factory=dict)
     agent_limits: dict[str, Any] = field(default_factory=dict)
+    private_paths: list[str] = field(default_factory=list)

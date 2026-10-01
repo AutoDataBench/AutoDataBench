@@ -5,6 +5,7 @@ from bench_core.task_def import TaskDefinition
 from bench_inspect import task_from_definition
 from bench_inspect.operations import auto_submit, data_read, train_and_eval
 from bench_inspect.state import current, initialize
+from bench_core.sandbox import lock_paths_from_agent
 
 
 class Validator:
@@ -98,3 +99,12 @@ def test_task_definition_builds_an_inspect_task() -> None:
     task = task_from_definition(definition)
     assert len(task.dataset) == 1
     assert task.dataset[0].id == "stub"
+
+
+def test_private_paths_are_hidden_from_sandbox_uid(tmp_path) -> None:
+    private = tmp_path / "test.jsonl"
+    private.write_text("secret")
+    private.chmod(0o644)
+    lock_paths_from_agent([str(private)])
+    assert private.stat().st_mode & 0o007 == 0
+    assert private.stat().st_mode & 0o600 == 0o600
